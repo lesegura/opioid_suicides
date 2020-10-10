@@ -5,6 +5,8 @@
 ##############################################
 library(tidyverse)
 
+load("adolescents.RData")
+
 adolescents <- adolescents %>%
   mutate(yo_mdea9_r = ifelse(yo_mdea9 == 99 & catag6 == 1 | yo_mdea9 == 2, 0, 
                              ifelse(yo_mdea9 == 94 | yo_mdea9 == 97 | yo_mdea9 == 89 |
@@ -24,7 +26,7 @@ adolescents <- adolescents %>%
                                       yowrdlot == 98 | yowrdlot == 99 & catag6 > 1, NA, yowrdlot)), 
          suic_atp = ifelse(yowrsatp == 2 | yowrsatp == 99 & catag6 == 1, 0, 
                            ifelse(yowrsatp == 94 | yowrsatp == 97 |
-                                    yowrsatp == 98 | yowrsatp == 99 & catag6 > 1, NA, yowrsatp)), 
+                                    yowrsatp == 98 | yowrsatp == 99 & catag6 > 1, NA, yowrsatp)), ### Suicidal Attempt
          race = factor(ifelse(newrace2 == 4 | newrace2 == 5 | newrace2 == 6, 3, 
                               ifelse(newrace2 == 7, 4, newrace2)), 
                        labels = c("Whites", "Blacks", "Others", "Hispanics")), 
@@ -62,12 +64,20 @@ adolescents <- adolescents %>%
                                                                                   "PY Medical Use Only", 
                                                                                   "PY Any Non-Medical Use")),
          anysedmf_r = factor(anysedmf, labels = c("No", "Yes")), 
-         wts4 = analwt_c / 4,
-         suic_id_count = rowSums(select(., yowrsthk_r, yowrspln_r, yowrdbtr_r, yowrdlot_r), na.rm = TRUE),
-         suic_id_miss = rowSums(is.na(select(., yowrsthk_r, yowrspln_r, yowrdbtr_r, yowrdlot_r))), 
+         wts4 = analwt_c / 4) 
+
+### Creating Suicidality Variables
+
+### Suicidal Ideation
+adolescents <- adolescents %>% 
+  mutate(suic_id_count = rowSums(select(., yowrsthk_r, yowrspln_r, yowrdbtr_r, yowrdlot_r), na.rm = TRUE),
+         suic_id_miss = rowSums(is.na(select(., yowrsthk_r, yowrspln_r, yowrdbtr_r, yowrdlot_r))),
          suic_id = ifelse(suic_id_miss == 4, NA, 
-                          ifelse(suic_id_count > 0, 1, suic_id_count)), 
-         suic_id_atp_count = rowSums(select(., suic_atp, suic_id), na.rm = TRUE),
+                          ifelse(suic_id_count > 0, 1, suic_id_count)))
+
+### Suicidal Ideation or Attempt
+adolescents <- adolescents %>% 
+  mutate(suic_id_atp_count = rowSums(select(., suic_atp, suic_id), na.rm = TRUE),
          suic_id_atp_miss = rowSums(is.na(select(., suic_atp, suic_id))), 
          suic_id_atp = ifelse(suic_id_atp_miss == 2, NA, 
                               ifelse(suic_id_atp_count == 2, 1, suic_id_atp_count)), 

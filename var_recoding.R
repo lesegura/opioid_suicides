@@ -3,6 +3,7 @@
 #               Variable Recoding            #
 #                                            #
 ##############################################
+library(tidyverse)
 
 adolescents <- adolescents %>%
   mutate(yo_mdea9_r = ifelse(yo_mdea9 == 99 & catag6 == 1 | yo_mdea9 == 2, 0, 

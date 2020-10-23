@@ -98,7 +98,9 @@ tidy(m5.f, conf.int = T, exponentiate = T)
 m11 <- svyglm(suic_id ~ med_po*talkprob_r + sex_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = design1, family = quasipoisson(link = "log"), data = adolescents)
 tidy(m11, conf.int = T, exponentiate = T)
 
-m11_emm <- emmeans(m11, "talkprob_r", infer = c(T, T), level = .95)
+m11_emm <- emmeans(m11, specs = ~ med_po : talkprob_r, 
+                   infer = c(T, T), level = .95) ### you need to tell emmeans that there is an interaction between med_po and talk_prob.
+                                                 ### Now it should display the log odds differences (emmean column) between both med_po and talk_prob          
 
 m11.y <- svyglm(suic_id ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "Yes"), family = quasipoisson(link = "log"), data = adolescents)
 tidy(m11.y, conf.int = T, exponentiate = T)
@@ -108,13 +110,20 @@ tidy(m11.n, conf.int = T, exponentiate = T)
 
 ### IC for social support / SI
 
-m11_reg <- regrid(m11_emm, transform = "response")
+m11_reg <- regrid(m11_emm, transform = "response") ### this is the backtransformation step.
+
+m11_reg ### if you call this object, it shows you the risk differences (RD) of SI between med_po and talk_prob
 
 contrast(m11_emm, by = ("talkprob_r"), method = "revpairwise", type = "response", infer = c(TRUE, TRUE))
 
 contrast(m11_reg, by = ("talkprob_r"), method = "revpairwise", type = "response", infer = c(TRUE, TRUE))
 
-contrast(m11_reg, interaction = "trt.vs.ctrl")
+contrast(m11_reg, interaction = "trt.vs.ctrl") ### this gets you the interaction contrast. You see here the first column med_potrt.vs.ctrl is showing
+                                               ### the differences between the (RD SI | PY Medical Use only vs no PO use) and (RD SI | talk_prob yes vs no), this is one interaction contrast
+                                               ### and the differences between the (RD SI | PY Any Non-Medical Use vs no PO use) and (RD SI | talk_prob yes vs no), this is another interaction contrast
+
+confint(contrast(m11_reg, interaction = "trt.vs.ctrl")) ### this gets you the confidence intervals for both interaction contrasts. You see there is evidence of additive interaction based 
+                                                        ### on the interaction contrast between (RD SI | PY Any Non-Medical Use vs no PO use) and (RD SI | talk_prob yes vs no) 0.14 (0.037 - 0.244)
 
 ### Association between medical, nonmedical PO and SA
 m6 <- svyglm(suic_atp ~ med_po + year_r, design = design1, family = quasipoisson(link = "log"), data = adolescents)

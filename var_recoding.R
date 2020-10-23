@@ -64,6 +64,7 @@ adolescents <- adolescents %>%
                                                                                   "PY Medical Use Only", 
                                                                                   "PY Any Non-Medical Use")),
          anysedmf_r = factor(anysedmf, labels = c("No", "Yes")), 
+         talkprob_r = factor(talkprob, labels = c("No", "Yes")),
          wts4 = analwt_c / 4) 
 
 ### Creating Suicidality Variables
@@ -92,3 +93,4 @@ adolescents <- adolescents %>%
 adolescents <- adolescents %>% mutate(po_freq_r = factor(ifelse(po_freq =="No Use", NA, po_freq) - 1, labels = c("Former PO Nonmedical Use", 
                                                                                                      "Recent-onset PO Nonmedical Use", 
                                                                                                      "Persistent PO Nonmedical Use")))
+

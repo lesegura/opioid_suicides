@@ -128,7 +128,6 @@ design %>%
             N = unweighted(n())) %>%
   print(n = 100)
 
-
 ### Prevalence of PY Suicide Ideation
 design %>% 
   # group_by(year_r) %>%
@@ -161,6 +160,12 @@ design %>%
             N = unweighted(n())) %>%
   print(n = 100) 
 
+### Proportion of social support (yes vs no) over time
+
+design %>%
+  group_by(year_r, talkprob_r) %>%
+  summarise(proportion = survey_mean(vartype = "ci"), 
+            N = unweighted(n()))
 
 ### GRAPH
 g.df <- design %>%

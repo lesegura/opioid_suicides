@@ -38,7 +38,7 @@ myvars <- c("questid2", "vestr", "verep", "analwt_c", "opinmyr", "opinmmon", "mr
             "ysptxnmh", "ymhasptx", "newrace2", "irsex", "catage", "catag2", "catag3", "catag6", "catag7", "coutyp4", 
             "pden10", "cocyr", "crkyr", "lsdyr", "pcpyr", "hallucyr", "ecstmoyr", "damtfxyr", "oxycnanyyr",
             "ketminyr", "salviayr", "inhalyr", "methamyr", "trqanyyr", "stmanyyr", "sedanyyr", "methamyr",
-            "sedanyyr", "trqnmyr", "dsthop12", "psyanyyr", "oxycnnmyr", "trqnmyr", "stmnmyr", "sednmyr", "psychyr")
+            "sedanyyr", "trqnmyr", "dsthop12", "psyanyyr", "oxycnnmyr", "trqnmyr", "stmnmyr", "sednmyr", "psychyr", "talkprob")
 
 
 ### look to do some data wrangling. 
@@ -56,6 +56,6 @@ rm("PUF2015_021518", "PUF2016_022818", "PUF2017_100918", "PUF2018_100819", "data
 
 adolescents <- nsduh[nsduh$catag6 == 1, ] ### subsetting dataset for only adolescents.
 
-setwd("INSERT PATH TO WHERE YOU WANT TO SAVE YOUR DATA, USE FORWARD SLASHES /") ### set working directory
+setwd("./data") ### set working directory
 
 save(adolescents, file = "adolescents.RData") ### save data as an Rdataset

@@ -10,7 +10,7 @@ library(ggplot2)
 library(emmeans)
 library(broom)
 
-### Setting up the survey desing
+### Setting up the survey design
 design1  <- svydesign(id = ~ verep, 
                       strata = ~ vestr,
                       weights = ~ analwt_c, ### note the weights for regression models
@@ -95,6 +95,15 @@ tidy(m5.m, conf.int = T, exponentiate = T)
 m5.f <- svyglm(suic_id ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, sex_r == "Female"), family = quasipoisson(link = "log"), data = adolescents)
 tidy(m5.f, conf.int = T, exponentiate = T)
 
+m11 <- svyglm(suic_id ~ med_po*talkprob_r + sex_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = design1, family = quasipoisson(link = "log"), data = adolescents)
+tidy(m11, conf.int = T, exponentiate = T)
+
+m11.y <- svyglm(suic_id ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "Yes"), family = quasipoisson(link = "log"), data = adolescents)
+tidy(m11.y, conf.int = T, exponentiate = T)
+
+m11.n <- svyglm(suic_id ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "No"), family = quasipoisson(link = "log"), data = adolescents)
+tidy(m11.n, conf.int = T, exponentiate = T)
+
 ### Association between medical, nonmedical PO and SA
 m6 <- svyglm(suic_atp ~ med_po + year_r, design = design1, family = quasipoisson(link = "log"), data = adolescents)
 tidy(m6, conf.int = T, exponentiate = T)
@@ -116,6 +125,15 @@ tidy(m10.m, conf.int = T, exponentiate = T)
 
 m10.f <- svyglm(suic_atp ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, sex_r == "Female"), family = quasipoisson(link = "log"), data = adolescents)
 tidy(m10.f, conf.int = T, exponentiate = T)
+
+m12 <- svyglm(suic_atp ~ med_po*talkprob_r + sex_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = design1, family = quasipoisson(link = "log"), data = adolescents)
+tidy(m12, conf.int = T, exponentiate = T)
+
+m12.y <- svyglm(suic_atp ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "Yes"), family = quasipoisson(link = "log"), data = adolescents)
+tidy(m12.y, conf.int = T, exponentiate = T)
+
+m12.n <- svyglm(suic_atp ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "No"), family = quasipoisson(link = "log"), data = adolescents)
+tidy(m12.n, conf.int = T, exponentiate = T)
 
 
 m5_emm <- emmeans(m5, "med_po", by = c("sex_r"), infer = c(T, T), level = .95)

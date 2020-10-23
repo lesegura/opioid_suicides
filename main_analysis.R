@@ -98,11 +98,23 @@ tidy(m5.f, conf.int = T, exponentiate = T)
 m11 <- svyglm(suic_id ~ med_po*talkprob_r + sex_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = design1, family = quasipoisson(link = "log"), data = adolescents)
 tidy(m11, conf.int = T, exponentiate = T)
 
+m11_emm <- emmeans(m11, "talkprob_r", infer = c(T, T), level = .95)
+
 m11.y <- svyglm(suic_id ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "Yes"), family = quasipoisson(link = "log"), data = adolescents)
 tidy(m11.y, conf.int = T, exponentiate = T)
 
 m11.n <- svyglm(suic_id ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "No"), family = quasipoisson(link = "log"), data = adolescents)
 tidy(m11.n, conf.int = T, exponentiate = T)
+
+### IC for social support / SI
+
+m11_reg <- regrid(m11_emm, transform = "response")
+
+contrast(m11_emm, by = ("talkprob_r"), method = "revpairwise", type = "response", infer = c(TRUE, TRUE))
+
+contrast(m11_reg, by = ("talkprob_r"), method = "revpairwise", type = "response", infer = c(TRUE, TRUE))
+
+contrast(m11_reg, interaction = "trt.vs.ctrl")
 
 ### Association between medical, nonmedical PO and SA
 m6 <- svyglm(suic_atp ~ med_po + year_r, design = design1, family = quasipoisson(link = "log"), data = adolescents)

@@ -150,11 +150,26 @@ tidy(m10.f, conf.int = T, exponentiate = T)
 m12 <- svyglm(suic_atp ~ med_po*talkprob_r + sex_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = design1, family = quasipoisson(link = "log"), data = adolescents)
 tidy(m12, conf.int = T, exponentiate = T)
 
+m12_emm <- emmeans(m12, specs = ~ med_po : talkprob_r, 
+                   infer = c(T, T), level = .95)
+
 m12.y <- svyglm(suic_atp ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "Yes"), family = quasipoisson(link = "log"), data = adolescents)
 tidy(m12.y, conf.int = T, exponentiate = T)
 
 m12.n <- svyglm(suic_atp ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "No"), family = quasipoisson(link = "log"), data = adolescents)
 tidy(m12.n, conf.int = T, exponentiate = T)
+
+### IC for social support / SA
+
+m12_reg <- regrid(m12_emm, transform = "response") ### this is the backtransformation step.
+
+contrast(m12_emm, by = ("talkprob_r"), method = "revpairwise", type = "response", infer = c(TRUE, TRUE))
+
+contrast(m12_reg, by = ("talkprob_r"), method = "revpairwise", type = "response", infer = c(TRUE, TRUE))
+
+contrast(m12_reg, interaction = "trt.vs.ctrl") 
+
+confint(contrast(m12_reg, interaction = "trt.vs.ctrl")) 
 
 
 m5_emm <- emmeans(m5, "med_po", by = c("sex_r"), infer = c(T, T), level = .95)

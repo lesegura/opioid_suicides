@@ -102,11 +102,11 @@ m11_emm <- emmeans(m11, specs = ~ med_po : talkprob_r,
                    infer = c(T, T), level = .95) ### you need to tell emmeans that there is an interaction between med_po and talk_prob.
                                                  ### Now it should display the log odds differences (emmean column) between both med_po and talk_prob          
 
-m11.y <- svyglm(suic_id ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "Yes"), family = quasipoisson(link = "log"), data = adolescents)
-tidy(m11.y, conf.int = T, exponentiate = T)
+m11.m <- svyglm(suic_id ~ med_po*talkprob_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, sex_r == "Male"), family = quasipoisson(link = "log"), data = adolescents)
+tidy(m11.m, conf.int = T, exponentiate = T)
 
-m11.n <- svyglm(suic_id ~ med_po + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "No"), family = quasipoisson(link = "log"), data = adolescents)
-tidy(m11.n, conf.int = T, exponentiate = T)
+m11.f <- svyglm(suic_id ~ med_po*talkprob_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, sex_r == "Female"), family = quasipoisson(link = "log"), data = adolescents)
+tidy(m11.f, conf.int = T, exponentiate = T)
 
 ### IC for social support / SI
 
@@ -153,11 +153,11 @@ tidy(m12, conf.int = T, exponentiate = T)
 m12_emm <- emmeans(m12, specs = ~ med_po : talkprob_r, 
                    infer = c(T, T), level = .95)
 
-m12.y <- svyglm(suic_atp ~ med_po + year_r + sex_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "Yes"), family = quasipoisson(link = "log"), data = adolescents)
-tidy(m12.y, conf.int = T, exponentiate = T)
+m12.m <- svyglm(suic_atp ~ med_po*talkprob_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, sex_r == "Male"), family = quasipoisson(link = "log"), data = adolescents)
+tidy(m12.m, conf.int = T, exponentiate = T)
 
-m12.n <- svyglm(suic_atp ~ med_po + year_r + sex_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, talkprob_r == "No"), family = quasipoisson(link = "log"), data = adolescents)
-tidy(m12.n, conf.int = T, exponentiate = T)
+m12.f <- svyglm(suic_atp ~ med_po*talkprob_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = subset(design1, sex_r == "Female"), family = quasipoisson(link = "log"), data = adolescents)
+tidy(m12.f, conf.int = T, exponentiate = T)
 
 ### IC for social support / SA
 

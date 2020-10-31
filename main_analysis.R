@@ -114,10 +114,6 @@ m11_reg <- regrid(m11_emm, transform = "response") ### this is the backtransform
 
 m11_reg ### if you call this object, it shows you the risk differences (RD) of SI between med_po and talk_prob
 
-contrast(m11_emm, by = ("talkprob_r"), method = "revpairwise", type = "response", infer = c(TRUE, TRUE))
-
-contrast(m11_reg, by = ("talkprob_r"), method = "revpairwise", type = "response", infer = c(TRUE, TRUE))
-
 contrast(m11_reg, interaction = "trt.vs.ctrl") ### this gets you the interaction contrast. You see here the first column med_potrt.vs.ctrl is showing
                                                ### the differences between the (RD SI | PY Medical Use only vs no PO use) and (RD SI | talk_prob yes vs no), this is one interaction contrast
                                                ### and the differences between the (RD SI | PY Any Non-Medical Use vs no PO use) and (RD SI | talk_prob yes vs no), this is another interaction contrast

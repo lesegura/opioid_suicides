@@ -64,7 +64,7 @@ adolescents <- adolescents %>%
                                                                                   "PY Medical Use Only", 
                                                                                   "PY Any Non-Medical Use")),
          anysedmf_r = factor(anysedmf, labels = c("No", "Yes")), 
-         talkprob_r = factor(talkprob, labels = c("No", "Yes")),
+         talkprob_r = factor(talkprob, labels = c("No one", "Someone")),
          wts4 = analwt_c / 4) 
 
 ### Creating Suicidality Variables

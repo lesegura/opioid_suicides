@@ -1,6 +1,6 @@
 ##############################################
 #                                            #
-#                 Main Analysis              #
+#     Main Analysis for Suicidal Ideation    #
 #                                            #
 ##############################################
 library(tidyverse)
@@ -100,7 +100,7 @@ contrast(m.si_reg, interaction = "trt.vs.ctrl") ### this gets you the interactio
 ### the differences between the (RD SI | PY Medical Use only vs no PO use) and (RD SI | talk_prob yes vs no), this is one interaction contrast
 ### and the differences between the (RD SI | PY Any Non-Medical Use vs no PO use) and (RD SI | talk_prob yes vs no), this is another interaction contrast
 
-ic_table <- as.tibble(confint(contrast(m.si_reg, interaction = "trt.vs.ctrl"))) ### this gets you the confidence intervals for both interaction contrasts. You see there is evidence of additive interaction based 
+ic_table <- as_tibble(confint(contrast(m.si_reg, interaction = "trt.vs.ctrl"))) ### this gets you the confidence intervals for both interaction contrasts. You see there is evidence of additive interaction based 
 ### on the interaction contrast between (RD SI | PY Any Non-Medical Use vs no PO use) and (RD SI | talk_prob yes vs no) 0.14 (0.037 - 0.244)
 
 ic_table <- ic_table %>%

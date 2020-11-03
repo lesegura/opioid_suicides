@@ -34,12 +34,12 @@ m.si.exp.adj <- svyglm(suic_id ~ med_po + talkprob_r2 + sex_r + year_r + race_r 
 tidy(m.si.exp.adj, exponentiate = T, conf.int = T)[-c(4:18), ]
 
 ### effect of PO on SI among those without social support
-m.si.exp.nosup <- svyglm(suic_id ~ med_po, design = subset(design1, talkprob_r2 == "No"), family = quasipoisson(link = "log"))
+m.si.exp.nosup <- svyglm(suic_id ~ med_po, design = subset(design1, talkprob_r2 == "No one"), family = quasipoisson(link = "log"))
 
 tidy(m.si.exp.nosup, exponentiate = T, conf.int = T)
 
 ### effect of PO on SI among those with social support
-m.si.exp.yessup <- svyglm(suic_id ~ med_po, design = subset(design1, talkprob_r2 == "Yes"), family = quasipoisson(link = "log"))
+m.si.exp.yessup <- svyglm(suic_id ~ med_po, design = subset(design1, talkprob_r2 == "Someone"), family = quasipoisson(link = "log"))
 
 tidy(m.si.exp.yessup, exponentiate = T, conf.int = T)
 
@@ -48,7 +48,17 @@ m.si.efm.nopo <- svyglm(suic_id ~ talkprob_r2, design = subset(design1, med_po =
 
 tidy(m.si.efm.nopo, exponentiate = T, conf.int = T)
 
+### effect of Social Support on SI among those with PO
+m.si.efm.medpo <- svyglm(suic_id ~ talkprob_r2, design = subset(design1, med_po == "PY Medical Use Only"), family = quasipoisson(link = "log"))
 
+tidy(m.si.efm.medpo, exponentiate = T, conf.int = T)
+
+### effect of Social Support on SI among those with PO
+m.si.efm.nomedpo <- svyglm(suic_id ~ talkprob_r2, design = subset(design1, med_po == "PY Any Non-Medical Use"), family = quasipoisson(link = "log"))
+
+tidy(m.si.efm.nomedpo, exponentiate = T, conf.int = T)
+
+ 
 ### social support as an effect modifier
 m.si <- svyglm(suic_id ~ med_po*talkprob_r2 + sex_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = design1, family = quasipoisson(link = "log"), data = adolescents)
 
@@ -100,5 +110,4 @@ ic_table <- ic_table %>%
                                                                                                 "IC Any PY Non-Medical Use: (Yes - No) vs Social Support: (Yes - No)"))) %>%
   select(-c(SE, df, med_po_trt.vs.ctrl, talkprob_r2_trt.vs.ctrl)) %>%
   relocate(contrast, .before = estimate)
-
 

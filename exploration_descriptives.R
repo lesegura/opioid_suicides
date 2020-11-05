@@ -15,12 +15,18 @@ design <- adolescents %>% as_survey_design(id = verep,
                                            weights = wts4,
                                            nest = TRUE)
 
+design.allyr  <-  adolescents %>% as_survey_design(id = verep, 
+                                                   strata = vestr,
+                                                   weights = analwt_c,
+                                                   nest = TRUE)
+
 
 ### function to transform a proportion to percent
 percent <- function(x) {
   x * 100
 }
 
+mycols <- c("#ad67c0", "#ff6a69", "#286fb8") 
 
 ### Prevalence of Medical/Nonmedical PO Use
 design %>% 
@@ -28,29 +34,118 @@ design %>%
   summarize(proportion = survey_mean(vartype = "ci"), 
             N = unweighted(n())) %>%
   mutate_if(is.numeric, percent) %>%
-  mutate(Cum_Prop = cumsum(proportion), 
-         Bottom = c(0, 81.0, 96.7),
-         N = N / 100, 
-         label = paste0(med_po, "\n", round(proportion, 2), "%"), 
-         label_position = (Cum_Prop + Bottom) / 2) %>%
+  arrange(proportion) %>%
+  mutate(ypos = cumsum(proportion) - 0.5 * proportion) %>%
+  mutate(label = paste0(med_po, "\n", round(proportion, 2), "%")) %>%
   print(n = 100) %>%
-  ggplot(aes(ymax = Cum_Prop, ymin = Bottom, xmax = 4, xmin = 3, fill = med_po)) +
-  geom_rect() + 
-  geom_text(x = 4.35, aes(y = label_position, label = label), size = 10, family = "Avenir") +
-  scale_fill_brewer(palette = "Dark2", direction = - 1) +
-  scale_color_brewer(palette = "Dark2", direction = - 1 ) +
-  coord_polar(theta = "y") +
-  xlim(c(2, 4)) + 
+  ggplot(aes(x = "", y = proportion, fill = med_po)) +
+  geom_bar(stat = "identity", width = 1) + 
+  coord_polar("y", start = 0) +
+  geom_text(aes(y = ypos, label = label), color = "white", size = 12, family = "Tahoma") +
   theme_void() +
-  theme(legend.position = "none")
+  theme(legend.position = "none") + 
+  scale_fill_manual(values = mycols)
 
-setwd("/Users/luissegura/Dropbox/Silvia/Teen Suicide and Opioids/Poster/CPDD2020") ### set the directory where the datasets are
+ggsave("po_use.eps", width = 13, height = 13, units = "in", dpi = 1800) 
 
-ggsave("donut_1.eps", width = 13, height = 13, units = "in", dpi = 1800) 
+
+### Prevalence of Social Support
+design %>% 
+  filter(is.na(talkprob_r2) == F) %>%
+  group_by(talkprob_r2) %>%
+  summarize(proportion = survey_mean(vartype = "ci"), 
+            N = unweighted(n())) %>%
+  mutate_if(is.numeric, percent) %>%
+  arrange(proportion) %>%
+  mutate(ypos = cumsum(proportion) - 0.5 * proportion) %>%
+  mutate(label = paste0(talkprob_r2, "\n", round(proportion, 2), "%")) %>%
+  print(n = 100) %>%
+  ggplot(aes(x = "", y = proportion, fill = talkprob_r2)) +
+  geom_bar(stat = "identity", width = 1) + 
+  coord_polar("y", start = 0) +
+  geom_text(aes(y = ypos, label = label), color = "white", size = 12, family = "Tahoma") +
+  theme_void() +
+  theme(legend.position = "none") + 
+  scale_fill_manual(values = mycols)
+
+ggsave("talkprob_use.eps", width = 13, height = 13, units = "in", dpi = 1800) 
+
+
+### Prevalence of Suicidality
+design %>%
+  mutate(suic_id_atp_fct = factor(interaction(suic_id, suic_atp), 
+                                  labels = c("No Suicidality", 
+                                             "Suicidal Ideation", 
+                                             "Suicidal Attempt"))) %>%
+  group_by(suic_id_atp_fct) %>%
+  summarize(proportion = survey_mean(vartype = "ci"),
+            N = unweighted(n())) %>%
+  drop_na() %>%
+  mutate_if(is.numeric, percent) %>%
+  arrange(proportion) %>%
+  mutate(ypos = cumsum(proportion) - 0.5 * proportion) %>%
+  mutate(label = paste0(suic_id_atp_fct, "\n", round(proportion, 2), "%")) %>%
+  print(n = 100) %>%
+  ggplot(aes(x = "", y = proportion, fill = suic_id_atp_fct)) +
+  geom_bar(stat = "identity", width = 1) + 
+  coord_polar("y", start = 0) +
+  geom_text(aes(y = ypos, label = label), color = "white", size = 12, family = "Tahoma") +
+  theme_void() +
+  theme(legend.position = "none") + 
+  scale_fill_manual(values = mycols)
+
+ggsave("suicidality.eps", width = 13, height = 13, units = "in", dpi = 1800) 
+
+
+list.tab <- list()
+
+myvars <- c("med_po", "talkprob_r2", "suic_id_atp_fct")
+
+for(i in seq_along(1:3)){
+  list.tab[[i]]  <-  
+  design %>% 
+      group_by(design$variable[myvars[i]]) %>%
+      summarise(proportion = survey_mean(vartype = "ci", na.rm = T))%>%
+      mutate_if(is.numeric, percent) %>%
+      drop_na() %>%
+      rename(., var2 = myvars[i]) %>%
+      print()
+}
+
+list.tab
+
+hist.plot <- do.call(rbind, list.tab)
+
+mylabs <- unique(hist.plot$var2)[-c(1, 4, 6)]
+
+hist.plot %>%
+  mutate(var1 = factor(c(rep(1, 3), rep(2, 2), rep(3, 3)), 
+                       labels = c("Prescription Opioid Use", 
+                                  "Social Support", 
+                                  "Suicidality"))) %>%
+  relocate(var1, .before = var2) %>%
+  filter(!var2 %in% c("No PO Use", "Someone", "No Suicidality")) %>%
+  droplevels() %>%
+  mutate(labelpos = cumsum(proportion) - 0.5 * proportion) %>%
+  ggplot(aes(x = var1, y = proportion, fill = var2, label = var2)) +
+  geom_bar(position = "stack", stat = "identity", width = 0.6) +
+  geom_text(position = "stack", vjust = +3, color = "white") +
+  scale_x_discrete(name = "") + 
+  scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, 2), name = "%") +
+  theme_hc() +
+  theme(text = element_text(family = "Avenir", size = 14), 
+        ### separating the x axis title from the x axis
+        axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)), 
+        ### removing legend
+        legend.position = "none", 
+        axis.ticks.x = element_blank())
+
+ggsave("descriptives.eps", width = 12, height = 8, units = "in", dpi = 1800)
+  
 
 ### Prevalence of PY PO Frequency 
 design %>% 
-  group_by(po_freq) %>%
+  group_by(suicid) %>%
   summarize(proportion = survey_mean(vartype = "ci"), 
             N = unweighted(n())) %>%
   mutate_if(is.numeric, proportion) %>%
@@ -75,7 +170,7 @@ setwd("/Users/luissegura/Dropbox/Silvia/Teen Suicide and Opioids/Poster/CPDD2020
 ggsave("donut_2.eps", width = 13, height = 13, units = "in", dpi = 1800) 
 
 
-### EXPLORING NSDUH YEARS 2015 - 2018
+### EXPLORING NSDUH YEARS 2015 - 2019
 
 ### Proportion of male/females
 design %>%
@@ -93,6 +188,12 @@ design %>%
 ### Prevalence over time of any PO misuse
 design %>% 
   group_by(year_r, pnrnmyr_r) %>%
+  summarize(proportion = survey_mean(vartype = "ci"), 
+            N = unweighted(n())) %>%
+  print(n = 100)
+
+design %>% 
+  group_by(year_r, talkprob_r) %>%
   summarize(proportion = survey_mean(vartype = "ci"), 
             N = unweighted(n())) %>%
   print(n = 100)

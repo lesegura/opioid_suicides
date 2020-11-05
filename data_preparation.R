@@ -2,7 +2,8 @@ library(tidyverse)
 
 ### I am going to pull the data from dropbox. First, save the dropbox links to an object
 dataUrl <- c("https://www.dropbox.com/s/rhki8s9so275ucv/NSDUH_2015.RData?dl=0", "https://www.dropbox.com/s/d24bhm356bbnd1h/NSDUH_2016.RData?dl=0", 
-             "https://www.dropbox.com/s/sragzrksgvj1jk3/NSDUH_2017.RData?dl=0", "https://www.dropbox.com/s/3cqon8ki69p1cgd/NSDUH_2018.RData?dl=0")
+             "https://www.dropbox.com/s/sragzrksgvj1jk3/NSDUH_2017.RData?dl=0", "https://www.dropbox.com/s/3cqon8ki69p1cgd/NSDUH_2018.RData?dl=0", 
+             "https://www.dropbox.com/s/96uxjt6d9y5srul/NSDUH_2019.RData?dl=0")
 
 ### change the dl-0 at the end for dl=1
 for(i in dataUrl){
@@ -15,7 +16,8 @@ ls(pattern = "PUF") ### look for the dataset names, they start with PUF
 dataList <- list(NSDUH15 = PUF2015_021518, 
                  NSDUH16 = PUF2016_022818, 
                  NSDUH17 = PUF2017_100918, 
-                 NSDUH18 = PUF2018_100819) ### save datasets into a list
+                 NSDUH18 = PUF2018_100819,
+                 NSDUH19 = PUF2019_100920) ### save datasets into a list
 
 
 ### Check the codebooks for the variable names that you need, and save them to an object
@@ -42,7 +44,7 @@ myvars <- c("questid2", "vestr", "verep", "analwt_c", "opinmyr", "opinmmon", "mr
 
 
 ### look to do some data wrangling. 
-for(i in 1:4){
+for(i in 1:5){
   names(dataList[[i]]) <- tolower(names(dataList[[i]])) ### turning variable names to low caps
   dataList[[i]] <- dataList[[i]][ , myvars] ### subsetting each dataset with only the variables in myvars
   dataList[[i]][["year"]] <- i + 2014 ### creating a year variable (starting year - 1)
@@ -52,7 +54,7 @@ for(i in 1:4){
 
 nsduh <- do.call(rbind, dataList) ### unlist the datasets and append them together
 
-rm("PUF2015_021518", "PUF2016_022818", "PUF2017_100918", "PUF2018_100819", "dataList") ### remove extra stuff from the environment
+rm("PUF2015_021518", "PUF2016_022818", "PUF2017_100918", "PUF2018_100819", "PUF2019_100920", "dataList") ### remove extra stuff from the environment
 
 adolescents <- nsduh[nsduh$catag6 == 1, ] ### subsetting dataset for only adolescents.
 

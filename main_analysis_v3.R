@@ -28,36 +28,34 @@ m.atp.efm <- svyglm(suic_atp ~ talkprob_r2, design = design1, family = quasipois
 
 tidy(m.atp.efm, exponentiate = T, conf.int = T)
 
-### adjusted model no effect modifier
-m.atp.exp.adj <- svyglm(suic_atp ~ med_po + talkprob_r2 + sex_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = design1, family = quasipoisson(link = "log"), data = adolescents)
+### adjusted model exposure no effect modifier
+m.atp.exp.adj <- svyglm(suic_atp ~ med_po + sex_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = design1, family = quasipoisson(link = "log"), data = adolescents)
 
-tidy(m.atp.exp.adj, exponentiate = T, conf.int = T)[-c(4:18), ]
+mainfx.exp <- tidy(m.atp.exp.adj, exponentiate = T, conf.int = T)[-c(1, 4:18), -c(3:5)]
 
-### effect of PO on SI among those without social support
-m.atp.exp.nosup <- svyglm(suic_atp ~ med_po, design = subset(design1, talkprob_r2 == "No one"), family = quasipoisson(link = "log"))
+mainfx.exp ### Risk Ratios
 
-tidy(m.atp.exp.nosup, exponentiate = T, conf.int = T)
 
-### effect of PO on SI among those with social support
-m.atp.exp.yessup <- svyglm(suic_atp ~ med_po, design = subset(design1, talkprob_r2 == "Someone"), family = quasipoisson(link = "log"))
+### adjusted model effect modifier no exposure
+m.atp.efm.adj <- svyglm(suic_atp ~ talkprob_r2 + sex_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = design1, family = quasipoisson(link = "log"), data = adolescents)
 
-tidy(m.atp.exp.yessup, exponentiate = T, conf.int = T)
+mainfx.efm <- tidy(m.atp.efm.adj, exponentiate = T, conf.int = T)[-c(1, 3:18), -c(3:5)]
 
-### effect of Social Support on SI among those without PO
-m.atp.efm.nopo <- svyglm(suic_atp ~ talkprob_r2, design = subset(design1, med_po == "No PO Use"), family = quasipoisson(link = "log"))
+mainfx.efm ### Risk Ratios
 
-tidy(m.atp.efm.nopo, exponentiate = T, conf.int = T)
 
-### effect of Social Support on SI among those with PO
-m.atp.efm.medpo <- svyglm(suic_atp ~ talkprob_r2, design = subset(design1, med_po == "PY Medical Use Only"), family = quasipoisson(link = "log"))
+### MAIN EFFECTS TABLE
 
-tidy(m.atp.efm.medpo, exponentiate = T, conf.int = T)
+main.fx.tab <- rbind(mainfx.exp, mainfx.efm)
 
-### effect of Social Support on SI among those with PO
-m.atp.efm.nomedpo <- svyglm(suic_atp ~ talkprob_r2, design = subset(design1, med_po == "PY Any Non-Medical Use"), family = quasipoisson(link = "log"))
+main.fx.tab
 
-tidy(m.atp.efm.nomedpo, exponentiate = T, conf.int = T)
 
+##################################################
+#                                                #
+#     Looking for interaction additive scale     #
+#                                                #
+##################################################
 
 ### social support as an effect modifier
 m.atp <- svyglm(suic_atp ~ med_po*talkprob_r2 + sex_r + year_r + race_r + county + bnghvymon_r + illyr_r + anysedmf, design = design1, family = quasipoisson(link = "log"), data = adolescents)
@@ -91,11 +89,14 @@ rd_table <- as.tibble(contrast(m.atp_reg, method = "revpairwise", reverse = T, i
 rd_table
 
 rd_table <- rd_table[rd_table$contrast %in% c("No PO Use No one - No PO Use Someone", 
-                                              "(PY Any Non-Medical Use No one) - (PY Any Non-Medical Use Someone)"), -c(3:4, 7:8)]
+                                              "PY Medical Use Only No one - PY Medical Use Only Someone",
+                                              "(PY Any Non-Medical Use No one) - (PY Any Non-Medical Use Someone)"), 
+                     -c(3:4, 7:8)]
 
 rd_table <- rd_table %>%
-  mutate(p = c("p01 - p00", "p11 - p10"), 
+  mutate(p = c("p01 - p00", "p11 - p10", "p11 - p10"), 
          contrast = factor(contrast, labels = c("RD(No PO Use, No Social Support - No PO Use, Some Social Support)", 
+                                                "RD(PY Medical Use Only No one - PY Medical Use Only Someone)",
                                                 "RD(PY Any Non-Medical Use, No Social Support) - (PY Any Non-Medical Use, Some Social Support)")))
 
 rd_table
@@ -117,3 +118,36 @@ ic_table <- ic_table %>%
   relocate(contrast, .before = estimate)
 
 ic_table
+
+
+
+###############################
+#                             #
+#            CHECKS           #
+#                             #
+###############################
+
+### effect of PO on SI among those without social support
+m.atp.exp.nosup <- svyglm(suic_atp ~ med_po, design = subset(design1, talkprob_r2 == "No one"), family = quasipoisson(link = "log"))
+
+tidy(m.atp.exp.nosup, exponentiate = T, conf.int = T)
+
+### effect of PO on SI among those with social support
+m.atp.exp.yessup <- svyglm(suic_atp ~ med_po, design = subset(design1, talkprob_r2 == "Someone"), family = quasipoisson(link = "log"))
+
+tidy(m.atp.exp.yessup, exponentiate = T, conf.int = T)
+
+### effect of Social Support on SI among those without PO
+m.atp.efm.nopo <- svyglm(suic_atp ~ talkprob_r2, design = subset(design1, med_po == "No PO Use"), family = quasipoisson(link = "log"))
+
+tidy(m.atp.efm.nopo, exponentiate = T, conf.int = T)
+
+### effect of Social Support on SI among those with PO
+m.atp.efm.medpo <- svyglm(suic_atp ~ talkprob_r2, design = subset(design1, med_po == "PY Medical Use Only"), family = quasipoisson(link = "log"))
+
+tidy(m.atp.efm.medpo, exponentiate = T, conf.int = T)
+
+### effect of Social Support on SI among those with PO
+m.atp.efm.nomedpo <- svyglm(suic_atp ~ talkprob_r2, design = subset(design1, med_po == "PY Any Non-Medical Use"), family = quasipoisson(link = "log"))
+
+tidy(m.atp.efm.nomedpo, exponentiate = T, conf.int = T)

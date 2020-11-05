@@ -95,6 +95,12 @@ adolescents <- adolescents %>% mutate(po_freq_r = factor(ifelse(po_freq =="No Us
                                                                                                      "Recent-onset PO Nonmedical Use", 
                                                                                                      "Persistent PO Nonmedical Use")))
 
+adolescents <- adolescents %>% mutate(suic_id_atp_fct = factor(interaction(suic_id, suic_atp), 
+                                             labels = c("No Suicidality", 
+                                                        "Suicidal Ideation", 
+                                                        "Suicidal Attempt")))
+
 table(adolescents$talkprob_r, adolescents$talkprob_r2)
 levels(adolescents$talkprob_r)
 levels(adolescents$talkprob_r2)
+

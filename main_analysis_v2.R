@@ -81,38 +81,39 @@ m.si_reg <- regrid(m.si_emm, transform = "response") ### this is the backtransfo
 
 m.si_reg ### if you call this object, it shows you the risk differences (RD) of SI between med_po and talk_prob
 
-ptable <- contrast(m.si_reg, method = "identity", reverse = T, infer = c(TRUE, TRUE)) ### p00, p01, p10, p11
+ptable.si <- contrast(m.si_reg, method = "identity", reverse = T, infer = c(TRUE, TRUE)) ### p00, p01, p10, p11
 
-ptable <- as_tibble(ptable) %>%
+ptable.si <- as_tibble(ptable.si) %>%
   mutate(p = c("p00", "p10", "p10", "p01", "p11", "p11"))
 
-ptable
+ptable.si
 
-rd_table <- as.tibble(contrast(m.si_reg, method = "revpairwise", reverse = T, infer = c(TRUE, TRUE))) ### p11 - p10 and p01 - p00.
+rd_table.si <- as_tibble(contrast(m.si_reg, method = "revpairwise", reverse = T, infer = c(TRUE, TRUE))) ### p11 - p10 and p01 - p00.
 
-rd_table
+rd_table.si
 
-rd_table <- rd_table[rd_table$contrast %in% c("No PO Use No one - No PO Use Someone", 
+rd_table.si <- rd_table.si[rd_table.si$contrast %in% c("No PO Use No one - No PO Use Someone", 
                                               "PY Medical Use Only No one - PY Medical Use Only Someone",
                                               "(PY Any Non-Medical Use No one) - (PY Any Non-Medical Use Someone)"), 
                      -c(3:4, 7:8)]
 
-rd_table <- rd_table %>%
+rd_table.si <- rd_table.si %>%
   mutate(p = c("p01 - p00", "p11 - p10", "p11 - p10"), 
-         contrast = factor(contrast, labels = c("RD(No PO Use, No Social Support - No PO Use, Some Social Support)", 
+         contrast = factor(contrast, levels = unique(contrast),
+                           labels = c("RD(No PO Use, No Social Support - No PO Use, Some Social Support)", 
                                                 "RD(PY Medical Use Only No one - PY Medical Use Only Someone)", 
                                                 "RD(PY Any Non-Medical Use, No Social Support) - (PY Any Non-Medical Use, Some Social Support)")))
 
-rd_table
+rd_table.si
 
 contrast(m.si_reg, interaction = "trt.vs.ctrl") ### this gets you the interaction contrast. You see here the first column med_potrt.vs.ctrl is showing
 ### the differences between the (RD SI | PY Medical Use only vs no PO use) and (RD SI | talk_prob yes vs no), this is one interaction contrast
 ### and the differences between the (RD SI | PY Any Non-Medical Use vs no PO use) and (RD SI | talk_prob yes vs no), this is another interaction contrast
 
-ic_table <- as_tibble(confint(contrast(m.si_reg, interaction = "trt.vs.ctrl"))) ### this gets you the confidence intervals for both interaction contrasts. You see there is evidence of additive interaction based 
+ic_table.si <- as_tibble(confint(contrast(m.si_reg, interaction = "trt.vs.ctrl"))) ### this gets you the confidence intervals for both interaction contrasts. You see there is evidence of additive interaction based 
 ### on the interaction contrast between (RD SI | PY Any Non-Medical Use vs no PO use) and (RD SI | talk_prob yes vs no) 0.14 (0.037 - 0.244)
 
-ic_table <- ic_table %>%
+ic_table.si <- ic_table.si %>%
   mutate(p = c("IC PY Medical PO: (p11 - p10) - (p01 - p00)", 
                "IC Any PY Non-Medical PO: (p11 - p10) - (p01 - p00)"), 
          contrast = factor(interaction(med_po_trt.vs.ctrl, talkprob_r2_trt.vs.ctrl), labels = c("IC PY Medical Use Only: (Yes - No) vs Social Support: (Yes - No)", 
@@ -121,7 +122,7 @@ ic_table <- ic_table %>%
   relocate(contrast, .before = estimate)
 
 
-
+ic_table.si
 
 
 ###############################

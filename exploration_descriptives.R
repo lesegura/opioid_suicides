@@ -7,6 +7,7 @@
 library(tidyverse)
 library(survey)
 library(srvyr)
+library(ggplot2)
 
 ### setting the survey design
 
@@ -198,7 +199,7 @@ design %>%
             N = unweighted(n())) %>%
   print(n = 100)
 
-
+### Prevalence over time of PO Use
 
 design %>% 
   group_by(year_r, med_po) %>%
@@ -225,6 +226,59 @@ design %>%
 ### Prevalence over time of PY PO frequency
 design %>% 
   group_by(year_r, po_freq) %>%
+  summarize(proportion = survey_mean(vartype = "ci"), 
+            N = unweighted(n())) %>%
+  print(n = 100)
+
+### Prevalence over time of Social Support
+design %>% 
+  filter(!is.na(talkprob_r2)) %>%
+  group_by(year_r, talkprob_r2) %>%
+  summarize(proportion = survey_mean(vartype = "ci"), 
+            N = unweighted(n())) %>%
+  print(n = 100)
+
+### Prevalence over time of Social Support by PO Use
+design %>% 
+  filter(!is.na(talkprob_r2)) %>%
+  mutate(ssuport = ifelse(talkprob_r2 == "No one", 1, 0)) %>%
+  group_by(year_r, med_po) %>%
+  summarize(proportion = survey_mean(ssuport, vartype = "ci"), 
+            N = unweighted(n())) %>%
+  mutate_if(is.numeric, percent) %>%
+  print(n = 100) %>%
+  ggplot(aes(x = as.integer(year_r), y = proportion, ymin = proportion_low, ymax = proportion_upp, 
+             color = med_po, fill = med_po)) +
+  geom_line() +
+  geom_ribbon(alpha = 0.2) +
+  scale_x_continuous(labels = c("2015", " 2016", "2017", " 2018", "2019")) +
+  ylab("%") + 
+  xlab("") +
+  scale_y_continuous(breaks = seq(1, 30, 4)) + 
+  expand_limits(y = c(0, 30)) + 
+  facet_wrap(~ med_po)
+  
+
+### Prevalence over time of Social Support by NO PO Use
+design %>% 
+  filter(!is.na(talkprob_r2) & med_po == "No PO Use") %>%
+  group_by(year_r, talkprob_r2) %>%
+  summarize(proportion = survey_mean(vartype = "ci"), 
+            N = unweighted(n())) %>%
+  print(n = 100)
+
+### Prevalence over time of Social Support by PO Medical Use
+design %>% 
+  filter(!is.na(talkprob_r2) & med_po == "PY Medical Use Only") %>%
+  group_by(year_r, talkprob_r2) %>%
+  summarize(proportion = survey_mean(vartype = "ci"), 
+            N = unweighted(n())) %>%
+  print(n = 100)
+
+### Prevalence over time of Social Support by PO Medical Use
+design %>% 
+  filter(!is.na(talkprob_r2) & med_po == "PY Any Non-Medical Use") %>%
+  group_by(year_r, talkprob_r2) %>%
   summarize(proportion = survey_mean(vartype = "ci"), 
             N = unweighted(n())) %>%
   print(n = 100)

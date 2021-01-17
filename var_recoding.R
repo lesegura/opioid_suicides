@@ -5,6 +5,8 @@
 ##############################################
 library(tidyverse)
 
+setwd("/Users/luissegura/Dropbox/Silvia/Teen Suicide and Opioids/Rcode/opioid_suicides/data/")
+
 load("adolescents.RData")
 
 adolescents <- adolescents %>%
